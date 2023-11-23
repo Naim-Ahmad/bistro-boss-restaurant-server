@@ -2,6 +2,8 @@ const express = require('express')
 
 const router = express.Router()
 const {client} = require('../config/db.config')
+const verifyToken = require('../middlewares/verifyToken')
+const verifyAdmin = require('../middlewares/verifyAdmin')
 
 const menusCollection = client.db('bistroBoss').collection('menus')
 
@@ -14,6 +16,15 @@ router.get('/menus', async (req, res)=>{
     }
     const result = await menusCollection.find(query).toArray()
     res.send(result)
+})
+
+router.post('/menu', verifyToken, verifyAdmin, async(req, res) => {
+    try {
+        const menuData = await menusCollection.insertOne(req.body)
+        res.send(menuData)
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
 })
 
 module.exports = router

@@ -2,12 +2,14 @@ const express = require('express')
 const router = express.Router()
 const { ObjectId } = require('mongodb')
 const {client} = require('../config/db.config')
+const verifyToken = require('../middlewares/verifyToken')
+const verifyAdmin = require('../middlewares/verifyAdmin')
 
 router.use(express.json())
 
 const usersCollection = client.db('bistroBoss').collection('users')
 
-router.get('/users', async(req, res) => {
+router.get('/users', verifyToken, verifyAdmin, async(req, res) => {
     try {
         const result = await usersCollection.find().toArray()
         res.send(result)
@@ -34,7 +36,7 @@ router.post('/user', async(req, res) => {
     }
 })
 
-router.delete('/user/:id', async(req, res) => {
+router.delete('/user/:id', verifyToken, verifyAdmin, async(req, res) => {
     try {
         const result = await usersCollection.deleteOne({_id: new ObjectId(req.params.id)})
         res.send(result)
